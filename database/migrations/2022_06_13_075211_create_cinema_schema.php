@@ -37,7 +37,47 @@ class CreateCinemaSchema extends Migration
      */
     public function up()
     {
-        throw new \Exception('implement in coding task 4, you can ignore this exception if you are just running the initial migrations.');
+        // create cinemas table...
+        Schema::create('cinemas', function (Blueprint $table) {
+            $table->id();
+            $table->string('name');
+            $table->timestamps();
+        });
+
+        // create shows table for store all the shows location wise for each cinema...
+        Schema::create('shows', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('cinema_id');
+            $table->string('name');
+            $table->string('location');
+            $table->integer('total_tickets');
+            $table->time('start_time');
+            $table->time('end_time');
+            $table->timestamps();
+            $table->foreign('cinema_id')->references('id')->on('cinemas')->onDelete('cascade');
+        });
+
+        Schema::create('tickets', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('show_id');
+            $table->decimal('price', 10, 2);
+            $table->string('ticket_name');
+            $table->integer('how_many_percent');
+            $table->timestamps();
+            $table->foreign('show_id')->references('id')->on('shows')->onDelete('cascade');
+        });
+
+        Schema::create('bookings', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('show_id');
+            $table->foreignId('user_id');
+            $table->foreignId('ticket_id');
+            $table->integer('no_of_tickets');
+            $table->timestamps();
+            $table->foreign('show_id')->references('id')->on('shows')->onDelete('cascade');
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+            $table->foreign('ticket_id')->references('id')->on('tickets')->onDelete('cascade');
+        });
     }
 
     /**
@@ -47,5 +87,9 @@ class CreateCinemaSchema extends Migration
      */
     public function down()
     {
+        Schema::dropIfExists('bookings');
+        Schema::dropIfExists('tickets');
+        Schema::dropIfExists('shows');
+        Schema::dropIfExists('cinemas');
     }
 }
